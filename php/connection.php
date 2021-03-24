@@ -1,7 +1,4 @@
 <?php
-$link = mysqli_connect("localhost", "root", "asd_123", "testdb")
-or die("Ошибка " . mysqli_error($link));
-
 class Database
 {
     public $_db;
@@ -20,10 +17,6 @@ class Database
             self::$_instance = new self();
         }
         return self::$_instance;
-    }
-
-    public function query($sql) {
-        return $this->_db->query($sql);
     }
 
 }

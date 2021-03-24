@@ -1,63 +1,79 @@
-<?php
-include 'php/product.php';
-global $druginfo;
-?>
-<!doctype html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.80.0">
-    <title>Starter Template · Bootstrap v5.0</title>
-
-    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/starter-template/">
-
-
-
-    <!-- Bootstrap core CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="style.css">
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="js/catalog.js"></script>
-
-
-
-</head>
+<? require 'htmlElements/header.php'; ?>
 <body>
-
-
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="index.php">Главная</a>
-                </li>
-            </ul>
-            <div class="d-flex">
-
-            </div>
-        </div>
-    </div>
-</nav>
+<? require 'htmlElements/navbar.php'; ?>
 
 <main class="container">
 
-    <section class="products my-auto mx-auto" >
+    <section class="products my-auto mx-auto">
         <div id="container-products-cart" class="container mx-center products-cart">
             <div id="products-show" class="row justify-content-md-center-my-auto row-flex">
-                <?php echo $druginfo; ?>
+                <?
+                require 'php/connection.php';
+                $db = Database::getInstance();
+                //запрос на выборку показаний препарата из базы данных
+                $sqlIndications = "SELECT  d.trade_name,d.international_name,di.indication
+                from drugs d,drugs_indications_for_use di,drugs_drugs_indications_for_use_link dil
+                where dil.drugs_id=:id and dil.drugs_id=d.id and dil.drugs_indications_for_use_id=di.id";
+
+                $query = $db->_db->prepare($sqlIndications);
+                $query->execute(array(':id' => $_GET['drug']));
+                $query->setFetchMode(PDO::FETCH_ASSOC);
+                $result = $query->fetchAll();
+
+                foreach ($result as $rowIndications) {
+                    $tradeName = $rowIndications['trade_name'];
+                    $internationalName = $rowIndications['international_name'];
+                    $indication .= $rowIndications['indication'];
+                }
+                if ($tradeName == '') {
+                    $tradeName = "Данные не заполнены";
+                }
+                ?>
+                <!--вывод названия и показаний-->
+                <img class="img-fluid mx-auto d-block img-product" src="src/image/tabletki.png" alt="">
+                <div class="text-center">
+                    <p class="name-product"><?= $tradeName ?></p>
+                    <p class="name-product1">МНН: <?= $internationalName ?></p>
+                </div>
+                <h5 class="text-start">Показания к применению:</h5>
+                <p class="text-start"><?= $indication ?></p>
+                <?
+                //запрос на выборку форм выпуска, дозировки и цены препарата из бд
+                $sqlCharacteristics = "SELECT  dc.form_of_issue,dc.dosage,dc.cost
+                from drugs d,drugs_characteristics dc,drugs_drugs_characteristics_link dci
+                where dci.drugs_id=:id and d.id=dci.drugs_id and dci.drugs_characteristics_id=dc.id";
+
+                $query = $db->_db->prepare($sqlCharacteristics);
+                $query->execute(array(':id' => $_GET['drug']));
+                $query->setFetchMode(PDO::FETCH_ASSOC);
+                $result = $query->fetchAll();
+
+                foreach ($result as $rowCharacteristics) {
+                    $form_of_issue = $rowCharacteristics['form_of_issue'];
+                    $dosage = $rowCharacteristics['dosage'];
+                    $cost = $rowCharacteristics['cost'];
+                    ?>
+                    <!--вывод форм выпуска-->
+                    <h5 class="text-start">Формы выпуска:</h5>
+                    <div id="products-Characteristics"
+                         class="row justify-content-md-center-my-auto row-flex text-center border-up">
+                        <div class="col justify  content-center my-auto col-product">
+                            <h6>Форма выпуска:</h6>
+                            <p><?= $form_of_issue ?></p>
+                        </div>
+                        <div class="col justify  content-center my-auto col-product">
+                            <h6>Дозировка:</h6>
+                            <p><?= $dosage ?></p>
+                        </div>
+                        <div class="col justify  content-center my-auto col-product">
+                            <h6>Цена:</h6>
+                            <p><?= $cost ?> руб.</p>
+                        </div>
+                    </div>
+                    <?
+                }
+                ?>
+
             </div>
         </div>
 
@@ -65,10 +81,6 @@ global $druginfo;
 
 
 </main><!-- /.container -->
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
-
 
 </body>
 </html>
