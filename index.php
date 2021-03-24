@@ -23,9 +23,7 @@
             ?>
             <div id="products-show" class="row justify-content-md-center-my-auto row-flex">
                 <?
-                foreach ($result
-
-                as $row) {
+                foreach ($result as $row) {
 
                 $currentName = $row['trade_name'];
                 $idDrug = $row['id'];
@@ -35,13 +33,13 @@
                 $countCol = 0;
                 ?>
             </div>
-            <div id="products-show<?= $currentName ?>" class="row justify-content-md-center-my-auto row-flex">;
+            <div id="products-show<?= $currentName ?>" class="row justify-content-md-center-my-auto row-flex">
                 <?
                 }
                 if ($countDrug > 1) {
                     $cost = "От " . $cost;
                 }
-                $countcol++;
+                $countCol++;
                 ?>
                 <div class="col justify  content-center my-auto col-product">
                     <img class="img-fluid mx-auto d-block img-product" src="src/image/tabletki.png">
