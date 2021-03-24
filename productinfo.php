@@ -8,26 +8,23 @@
         <div id="container-products-cart" class="container mx-center products-cart">
             <div id="products-show" class="row justify-content-md-center-my-auto row-flex">
                 <?
-                require 'php/connection.php';
+                require 'php/Database.php';
                 $db = Database::getInstance();
                 //запрос на выборку показаний препарата из базы данных
                 $sqlIndications = "SELECT  d.trade_name,d.international_name,di.indication
                 from drugs d,drugs_indications_for_use di,drugs_drugs_indications_for_use_link dil
                 where dil.drugs_id=:id and dil.drugs_id=d.id and dil.drugs_indications_for_use_id=di.id";
 
-                $query = $db->_db->prepare($sqlIndications);
-                $query->execute(array(':id' => $_GET['drug']));
-                $query->setFetchMode(PDO::FETCH_ASSOC);
-                $result = $query->fetchAll();
+                $result = $db->query($sqlIndications,[':id' => $_GET['drug']]);
 
-                foreach ($result as $rowIndications) {
+                foreach ($result as $rowIndications) :
                     $tradeName = $rowIndications['trade_name'];
                     $internationalName = $rowIndications['international_name'];
                     $indication .= $rowIndications['indication'];
-                }
-                if ($tradeName == '') {
+                endforeach;
+                if ($tradeName == '') :
                     $tradeName = "Данные не заполнены";
-                }
+                endif;
                 ?>
                 <!--вывод названия и показаний-->
                 <img class="img-fluid mx-auto d-block img-product" src="src/image/tabletki.png" alt="">
@@ -43,12 +40,9 @@
                 from drugs d,drugs_characteristics dc,drugs_drugs_characteristics_link dci
                 where dci.drugs_id=:id and d.id=dci.drugs_id and dci.drugs_characteristics_id=dc.id";
 
-                $query = $db->_db->prepare($sqlCharacteristics);
-                $query->execute(array(':id' => $_GET['drug']));
-                $query->setFetchMode(PDO::FETCH_ASSOC);
-                $result = $query->fetchAll();
+                $result = $db->query($sqlCharacteristics,[':id' => $_GET['drug']]);
 
-                foreach ($result as $rowCharacteristics) {
+                foreach ($result as $rowCharacteristics) :
                     $form_of_issue = $rowCharacteristics['form_of_issue'];
                     $dosage = $rowCharacteristics['dosage'];
                     $cost = $rowCharacteristics['cost'];
@@ -70,9 +64,7 @@
                             <p><?= $cost ?> руб.</p>
                         </div>
                     </div>
-                    <?
-                }
-                ?>
+                    <? endforeach; ?>
 
             </div>
         </div>
@@ -82,6 +74,4 @@
 
 </main><!-- /.container -->
 
-</body>
-</html>
-
+<? require 'htmlElements/footer.php'; ?>
